@@ -18,7 +18,7 @@ app.get('/', (req, res) => {
     res.send('Server is live')
 })
 
-app.use("/api/ingest", serve({ client: inngest, functions }))
+app.use("/api/inngest", serve({ client: inngest, functions }))
 
 
 const PORT = process.env.PORT || 5000
