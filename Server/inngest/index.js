@@ -123,6 +123,23 @@ const syncWorkspaceDeletion = inngest.createFunction(
 );
 
 
+// Inngest function to add workspace member
+const syncWorkspaceMemberCreation = inngest.createFunction(
+    { id: "sync-workspace-member-from-clerk", triggers: [{ event: "clerk/organizationInvitation.accepted" }] },
+    async ({ event }) => {
+        const { data } = event;
+
+        await prisma.workspaceMember.create({
+            data: {
+                userId: data.user_id,
+                workspaceId: data.organization_id,
+                role: String(data.role_name).toUpperCase(),
+            },
+        });
+    }
+);
+
+
 
 
 
@@ -133,5 +150,6 @@ export const functions = [
     syncUserUpdation,
     syncWorkspaceCreation,
     syncWorkspaceUpdation,
-    syncWorkspaceDeletion
+    syncWorkspaceDeletion,
+    syncWorkspaceMemberCreation
 ];
