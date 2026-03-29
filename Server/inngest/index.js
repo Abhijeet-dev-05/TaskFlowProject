@@ -54,9 +54,84 @@ const syncUserUpdation = inngest.createFunction(
     }
 );
 
+
+
+// Inngest Function to save workspace data to database
+const syncWorkspaceCreation = inngest.createFunction(
+    { id: "sync-workspace-from-clerk", triggers: [{ event: "clerk/organization.created" }] },
+    async ({ event }) => {
+        const { data } = event;
+
+        // Create workspace
+        await prisma.workspace.create({
+            data: {
+                id: data.id,
+                name: data.name,
+                slug: data.slug,
+                ownerId: data.created_by,
+                image_url: data.image_url,
+            },
+        });
+
+        // Add creator as ADMIN member
+        await prisma.workspaceMember.create({
+            data: {
+                userId: data.created_by,
+                workspaceId: data.id,
+                role: "ADMIN",
+            },
+        });
+    }
+);
+
+
+// Inngest function to update workspace data in database
+const syncWorkspaceUpdation = inngest.createFunction(
+    { id: "update-workspace-from-clerk", triggers: [{ event: "clerk/organization.updated" }] },
+    async ({ event }) => {
+        const { data } = event;
+
+        await prisma.workspace.update({
+            where: {
+                id: data.id,
+            },
+            data: {
+                name: data.name,
+                slug: data.slug,
+                image_url: data.image_url,
+            },
+        });
+    }
+);
+
+
+
+
+
+// Inngest function to delete workspace from database
+const syncWorkspaceDeletion = inngest.createFunction(
+    { id: "delete-workspace-with-clerk", triggers: [{ event: "clerk/organization.deleted" }] },
+    async ({ event }) => {
+        const { data } = event;
+
+        await prisma.workspace.delete({
+            where: {
+                id: data.id,
+            },
+        });
+    }
+);
+
+
+
+
+
 // Export our functions so they can be registered with Inngest
 export const functions = [
     syncUserCreation,
     syncUserDeletion,
-    syncUserUpdation
+    syncUserUpdation,
+    syncWorkspaceCreation,
+    syncWorkspaceUpdation,
+    syncWorkspaceDeletion
 ];
