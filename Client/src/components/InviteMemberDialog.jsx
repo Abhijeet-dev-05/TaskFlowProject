@@ -1,8 +1,13 @@
 import { useState } from "react";
 import { Mail, UserPlus } from "lucide-react";
 import { useSelector } from "react-redux";
+import { useAuth } from "@clerk/clerk-react";
+import toast from "react-hot-toast";
+import api from "../configs/api";
 
 const InviteMemberDialog = ({ isDialogOpen, setIsDialogOpen }) => {
+
+    const { getToken } = useAuth();
 
     const currentWorkspace = useSelector((state) => state.workspace?.currentWorkspace || null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -13,7 +18,36 @@ const InviteMemberDialog = ({ isDialogOpen, setIsDialogOpen }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsSubmitting(true);
 
+        try {
+            const token = await getToken();
+
+            // Use our server API which calls Clerk Backend API with redirectUrl
+            // This ensures the invitation email link points to OUR app, not Clerk hosted pages
+            await api.post("/api/invite", {
+                emailAddress: formData.email,
+                role: formData.role,
+                redirectUrl: `${window.location.origin}/`,
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            toast.success("Invitation sent successfully");
+            setFormData({ email: "", role: "org:member" });
+            setIsDialogOpen(false);
+        } catch (error) {
+            console.log(error);
+            toast.error(
+                error?.response?.data?.message ||
+                error?.errors?.[0]?.message ||
+                error.message
+            );
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     if (!isDialogOpen) return null;
