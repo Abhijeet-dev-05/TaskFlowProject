@@ -24,6 +24,10 @@ export const getUserWorkspaces = async (req, res) => {
                         tasks: {
                             include: {
                                 assignee: true,
+                                subtasks: {
+                                    include: { assignee: true },
+                                    orderBy: { createdAt: "asc" },
+                                },
                                 comments: {
                                     include: {
                                         user: true,

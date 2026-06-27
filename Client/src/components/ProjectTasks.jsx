@@ -22,7 +22,7 @@ const priorityTexts = {
     HIGH: { background: "bg-emerald-100 dark:bg-emerald-950", prioritycolor: "text-emerald-600 dark:text-emerald-400" },
 };
 
-const ProjectTasks = ({ tasks }) => {
+const ProjectTasks = ({ tasks, canDeleteTask = true }) => {
     const { getToken } = useAuth()
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -87,7 +87,7 @@ const ProjectTasks = ({ tasks }) => {
 
             toast.loading("Deleting tasks...");
 
-            await api.post("api/tasks/delete", { tasksIds: selectedTasks }, {
+            await api.post("/api/tasks/delete", { tasksIds: selectedTasks }, {
                 headers: { Authorization: `Bearer ${token}` }
             })
 
@@ -149,7 +149,7 @@ const ProjectTasks = ({ tasks }) => {
                     </button>
                 )}
 
-                {selectedTasks.length > 0 && (
+                {selectedTasks.length > 0 && canDeleteTask && (
                     <button type="button" onClick={handleDelete} className="px-3 py-1 flex items-center gap-2 rounded bg-gradient-to-br from-indigo-400 to-indigo-500 text-zinc-100 dark:text-zinc-200 text-sm transition-colors" >
                         <Trash className="size-3" /> Delete
                     </button>

@@ -1,6 +1,7 @@
 import express from 'express'
 import 'dotenv/config'
 import cors from 'cors'
+
 import { clerkMiddleware } from '@clerk/express'
 import { serve } from 'inngest/express'
 import { inngest, functions } from './inngest/index.js'
@@ -10,9 +11,12 @@ import projectRouter from './routes/projectRoutes.js'
 import taskRouter from './routes/taskRoutes.js'
 import commentRouter from './routes/commentRoutes.js'
 import inviteRouter from './routes/inviteRoutes.js'
-
+import analyticsRouter from './routes/analyticsRoutes.js'
+import exportRouter from './routes/exportRoutes.js'
 
 const app = express()
+
+
 
 
 app.use(express.json())
@@ -31,6 +35,8 @@ app.use("/api/projects", protect, projectRouter)
 app.use("/api/tasks", protect, taskRouter)
 app.use("/api/comments", protect, commentRouter)
 app.use("/api/invite", protect, inviteRouter)
+app.use("/api/analytics", protect, analyticsRouter)
+app.use("/api/export", protect, exportRouter)
 
 
 const PORT = process.env.PORT || 5000

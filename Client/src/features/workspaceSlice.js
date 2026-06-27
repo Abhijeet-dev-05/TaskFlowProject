@@ -98,19 +98,22 @@ const workspaceSlice = createSlice({
             );
         },
         deleteTask: (state, action) => {
-            state.currentWorkspace.projects.map((p) => {
-                p.tasks = p.tasks.filter((t) => !action.payload.includes(t.id));
-                return p;
+            const taskIds = Array.isArray(action.payload) ? action.payload : [];
+
+            state.currentWorkspace?.projects?.forEach((p) => {
+                p.tasks = p.tasks.filter((t) => !taskIds.includes(t.id));
             });
-            // find workspace and project by id and delete task from it
+
             state.workspaces = state.workspaces.map((w) =>
-                w.id === state.currentWorkspace.id ? {
-                    ...w, projects: w.projects.map((p) =>
-                        p.id === action.payload.projectId ? {
-                            ...p, tasks: p.tasks.filter((t) => !action.payload.includes(t.id))
-                        } : p
-                    )
-                } : w
+                w.id === state.currentWorkspace?.id
+                    ? {
+                          ...w,
+                          projects: w.projects.map((p) => ({
+                              ...p,
+                              tasks: p.tasks.filter((t) => !taskIds.includes(t.id)),
+                          })),
+                      }
+                    : w
             );
         }
 

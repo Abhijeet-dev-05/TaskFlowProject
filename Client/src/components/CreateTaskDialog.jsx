@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { format } from "date-fns";
 import { useAuth } from "@clerk/clerk-react";
@@ -74,6 +74,7 @@ export default function CreateTaskDialog({ showCreateTask, setShowCreateTask, pr
         }
     };
 
+
     return showCreateTask ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 dark:bg-black/60 backdrop-blur p-4 sm:p-6">
             <div className="bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto p-6 text-zinc-900 dark:text-white">
@@ -83,7 +84,9 @@ export default function CreateTaskDialog({ showCreateTask, setShowCreateTask, pr
                     {/* Title */}
                     <div className="space-y-1">
                         <label htmlFor="title" className="text-sm font-medium">Title</label>
-                        <input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} placeholder="Task title" className="w-full rounded dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-zinc-900 dark:text-zinc-200 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+                        <div className="relative">
+                            <input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} placeholder="Task title" className="w-full rounded dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-zinc-900 dark:text-zinc-200 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+                        </div>
                     </div>
 
                     {/* Description */}
@@ -107,7 +110,7 @@ export default function CreateTaskDialog({ showCreateTask, setShowCreateTask, pr
 
                         <div className="space-y-1">
                             <label className="text-sm font-medium">Priority</label>
-                            <select value={formData.priority} onChange={(e) => setFormData({ ...formData, priority: e.target.value })} className="w-full rounded dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-zinc-900 dark:text-zinc-200 text-sm mt-1"                             >
+                            <select value={formData.priority} onChange={(e) => setFormData({ ...formData, priority: e.target.value })} className="w-full rounded dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-zinc-900 dark:text-zinc-200 text-sm mt-1"                            >
                                 <option value="LOW">Low</option>
                                 <option value="MEDIUM">Medium</option>
                                 <option value="HIGH">High</option>
@@ -118,16 +121,16 @@ export default function CreateTaskDialog({ showCreateTask, setShowCreateTask, pr
                     {/* Assignee and Status */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
-                            <label className="text-sm font-medium">Assignee</label>
-                            <select value={formData.assigneeId} onChange={(e) => setFormData({ ...formData, assigneeId: e.target.value })} className="w-full rounded dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-zinc-900 dark:text-zinc-200 text-sm mt-1" >
-                                <option value="">Unassigned</option>
-                                {teamMembers.map((member) => (
-                                    <option key={member?.user.id} value={member?.user.id}>
-                                        {member?.user.email}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                        <label className="text-sm font-medium">Assignee</label>
+                        <select value={formData.assigneeId} onChange={(e) => setFormData({ ...formData, assigneeId: e.target.value })} className="w-full rounded dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-zinc-900 dark:text-zinc-200 text-sm mt-1" >
+                            <option value="">Unassigned</option>
+                            {teamMembers.map((member) => (
+                                <option key={member?.user.id} value={member?.user.id}>
+                                    {member?.user.email}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
                         <div className="space-y-1">
                             <label className="text-sm font-medium">Status</label>
@@ -138,6 +141,7 @@ export default function CreateTaskDialog({ showCreateTask, setShowCreateTask, pr
                             </select>
                         </div>
                     </div>
+
 
                     {/* Due Date */}
                     <div className="space-y-1">

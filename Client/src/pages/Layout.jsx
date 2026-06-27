@@ -7,6 +7,7 @@ import { loadTheme } from '../features/themeSlice'
 import { Loader2Icon } from 'lucide-react'
 import { useUser, SignIn, SignUp, useAuth, useClerk, useOrganization, CreateOrganization } from '@clerk/clerk-react'
 import { fetchWorkspaces } from '../features/workspaceSlice'
+import LandingPage from './LandingPage'
 
 const Layout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -130,11 +131,7 @@ const Layout = () => {
                 </div>
             );
         }
-        return (
-            <div className="flex justify-center items-center h-screen bg-white dark:bg-zinc-950">
-                <SignIn forceRedirectUrl={'/'} routing="hash" />
-            </div>
-        );
+        return <LandingPage />;
     }
 
     if (loading) return (

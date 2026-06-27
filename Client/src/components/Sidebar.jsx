@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom'
 import MyTasksSidebar from './MyTasksSidebar'
 import ProjectSidebar from './ProjectsSidebar'
 import WorkspaceDropdown from './WorkspaceDropdown'
-import { FolderOpenIcon, LayoutDashboardIcon, SettingsIcon, UsersIcon } from 'lucide-react'
+import { FolderOpenIcon, LayoutDashboardIcon, SettingsIcon, UsersIcon, BarChart3Icon, Code2 } from 'lucide-react'
 import { useClerk } from '@clerk/clerk-react'
 
 const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
@@ -15,6 +15,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
         { name: 'Dashboard', href: '/', icon: LayoutDashboardIcon },
         { name: 'Projects', href: '/projects', icon: FolderOpenIcon },
         { name: 'Team', href: '/team', icon: UsersIcon },
+        { name: 'Workload', href: '/workload', icon: BarChart3Icon },
     ]
 
     const sidebarRef = useRef(null);

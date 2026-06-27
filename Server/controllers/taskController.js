@@ -27,12 +27,18 @@ export const createTask = async (req, res) => {
         if (!project) {
             return res.status(404).json({ message: "Project not found" });
         }
-        else if (project.team_lead !== userId) {
+
+        // RBAC: Only ADMIN and MANAGER can create tasks
+        const memberRecord = project.members.find((m) => m.user.id === userId);
+        const isTeamLead = project.team_lead === userId;
+
+        if (!isTeamLead && (!memberRecord || memberRecord.role === "MEMBER")) {
             return res.status(403).json({
-                message: "You don't have admin privileges for this project",
+                message: "Only Admins and Managers can create tasks",
             });
         }
-        else if (
+
+        if (
             assigneeId &&
             !project.members.find(
                 (member) => member.user.id === assigneeId
@@ -71,6 +77,8 @@ export const createTask = async (req, res) => {
             }
         })
 
+
+
         res.json({
             task: taskWithAssignee,
             message: "Task created successfully",
@@ -90,6 +98,7 @@ export const updateTask = async (req, res) => {
         // Find task
         const task = await prisma.task.findUnique({
             where: { id: req.params.id },
+            include: { assignee: true },
         });
 
         if (!task) {
@@ -106,17 +115,37 @@ export const updateTask = async (req, res) => {
 
         if (!project) {
             return res.status(404).json({ message: "Project not found" });
-        } else if (project.team_lead !== userId) {
+        }
+
+        // RBAC: Check permissions
+        const memberRecord = project.members.find((m) => m.user.id === userId);
+        const isTeamLead = project.team_lead === userId;
+        const isAdmin = isTeamLead || (memberRecord && memberRecord.role === "ADMIN");
+        const isManager = memberRecord && memberRecord.role === "MANAGER";
+        const isMember = memberRecord && memberRecord.role === "MEMBER";
+
+        if (isMember && task.assigneeId !== userId) {
             return res.status(403).json({
-                message: "You don't have admin privileges for this project",
+                message: "Members can only update their own tasks",
             });
         }
+
+        if (!isTeamLead && !isAdmin && !isManager && !isMember) {
+            return res.status(403).json({
+                message: "You don't have permission to update this task",
+            });
+        }
+
+
 
         // Update task
         const updatedTask = await prisma.task.update({
             where: { id: req.params.id },
             data: req.body,
+            include: { assignee: true },
         });
+
+
 
         res.json({
             task: updatedTask,
@@ -153,9 +182,16 @@ export const deleteTask = async (req, res) => {
 
         if (!project) {
             return res.status(404).json({ message: "Project not found" });
-        } else if (project.team_lead !== userId) {
+        }
+
+        // RBAC: Only ADMIN and team lead can delete tasks
+        const memberRecord = project.members.find((m) => m.user.id === userId);
+        const isTeamLead = project.team_lead === userId;
+        const isAdmin = memberRecord && memberRecord.role === "ADMIN";
+
+        if (!isTeamLead && !isAdmin) {
             return res.status(403).json({
-                message: "You don't have admin privileges for this project",
+                message: "Only Admins can delete tasks",
             });
         }
 
@@ -163,6 +199,8 @@ export const deleteTask = async (req, res) => {
         await prisma.task.deleteMany({
             where: { id: { in: tasksIds } },
         });
+
+
 
         res.json({
             message: "Task deleted successfully",

@@ -34,7 +34,7 @@ const Dashboard = () => {
                     <ProjectOverview />
                     <RecentActivity />
                 </div>
-                <div>
+                <div className="space-y-6">
                     <TasksSummary />
                 </div>
             </div>

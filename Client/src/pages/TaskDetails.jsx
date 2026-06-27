@@ -3,9 +3,10 @@ import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { CalendarIcon, MessageCircle, PenIcon } from "lucide-react";
+import { CalendarIcon, MessageCircle, PenIcon, Lightbulb, Link2, Lock, Unlock, PlusCircle, Trash2, ArrowRight, CheckCircle2 } from "lucide-react";
 import { useAuth, useUser } from "@clerk/clerk-react"
 import api from '../configs/api'
+import CodeBlock from '../components/CodeBlock'
 
 const TaskDetails = () => {
 
@@ -20,7 +21,6 @@ const TaskDetails = () => {
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState("");
     const [loading, setLoading] = useState(true);
-
     const { currentWorkspace } = useSelector((state) => state.workspace);
 
     const fetchComments = async () => {
@@ -84,6 +84,8 @@ const TaskDetails = () => {
         }
     };
 
+
+
     useEffect(() => { fetchTaskDetails(); }, [taskId]);
 
     useEffect(() => {
@@ -93,6 +95,7 @@ const TaskDetails = () => {
             return () => clearInterval(interval);
         }
     }, [taskId, task]);
+
 
     if (loading) return <div className="text-gray-500 dark:text-zinc-400 px-4 py-6">Loading task details...</div>;
     if (!task) return <div className="text-red-500 px-4 py-6">Task not found.</div>;
@@ -118,7 +121,7 @@ const TaskDetails = () => {
                                                 • {format(new Date(comment.createdAt), "dd MMM yyyy, HH:mm")}
                                             </span>
                                         </div>
-                                        <p className="text-sm text-gray-900 dark:text-zinc-200">{comment.content}</p>
+                                        <CodeBlock content={comment.content} />
                                     </div>
                                 ))}
                             </div>
@@ -140,6 +143,10 @@ const TaskDetails = () => {
                             Post
                         </button>
                     </div>
+
+                    <p className="text-[10px] text-zinc-500 mt-2 mb-1 flex items-center gap-1">
+                        <Lightbulb className="size-3 text-amber-500" /> Tip: Use ```js ... ``` to format code
+                    </p>
                 </div>
             </div>
 
@@ -179,6 +186,7 @@ const TaskDetails = () => {
                         </div>
                     </div>
                 </div>
+
 
                 {/* Project Info */}
                 {project && (

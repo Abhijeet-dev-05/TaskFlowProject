@@ -1,12 +1,17 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeftIcon, PlusIcon, SettingsIcon, BarChart3Icon, CalendarIcon, FileStackIcon, ZapIcon } from "lucide-react";
+import { ArrowLeftIcon, PlusIcon, SettingsIcon, BarChart3Icon, CalendarIcon, FileStackIcon, ZapIcon, MegaphoneIcon, List, Download } from "lucide-react";
 import ProjectAnalytics from "../components/ProjectAnalytics";
 import ProjectSettings from "../components/ProjectSettings";
 import CreateTaskDialog from "../components/CreateTaskDialog";
 import ProjectCalendar from "../components/ProjectCalendar";
 import ProjectTasks from "../components/ProjectTasks";
+import ExportButton from "../components/ExportButton";
+
+import RoleBadge from "../components/RoleBadge";
+
+import useUserRole from "../hooks/useUserRole";
 
 export default function ProjectDetail() {
 
@@ -21,6 +26,12 @@ export default function ProjectDetail() {
     const [tasks, setTasks] = useState([]);
     const [showCreateTask, setShowCreateTask] = useState(false);
     const [activeTab, setActiveTab] = useState(tab || "tasks");
+    const [taskView, setTaskView] = useState("table");
+
+
+
+    // RBAC
+    const { role, canCreateTask, canDeleteTask, canAccessSettings } = useUserRole(project);
 
     useEffect(() => {
         if (tab) setActiveTab(tab);
@@ -66,12 +77,18 @@ export default function ProjectDetail() {
                         <span className={`px-2 py-1 rounded text-xs capitalize ${statusColors[project.status]}`} >
                             {project.status.replace("_", " ")}
                         </span>
+                        <RoleBadge role={role} size="xs" />
                     </div>
                 </div>
-                <button onClick={() => setShowCreateTask(true)} className="flex items-center gap-2 px-5 py-2 text-sm rounded bg-gradient-to-br from-blue-500 to-blue-600 text-white" >
-                    <PlusIcon className="size-4" />
-                    New Task
-                </button>
+                <div className="flex items-center gap-2">
+                    <ExportButton projectId={project.id} />
+                    {canCreateTask && (
+                        <button onClick={() => setShowCreateTask(true)} className="flex items-center gap-2 px-5 py-2 text-sm rounded bg-gradient-to-br from-blue-500 to-blue-600 text-white" >
+                            <PlusIcon className="size-4" />
+                            New Task
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Info Cards */}
@@ -99,7 +116,7 @@ export default function ProjectDetail() {
                         { key: "tasks", label: "Tasks", icon: FileStackIcon },
                         { key: "calendar", label: "Calendar", icon: CalendarIcon },
                         { key: "analytics", label: "Analytics", icon: BarChart3Icon },
-                        { key: "settings", label: "Settings", icon: SettingsIcon },
+                        ...(canAccessSettings ? [{ key: "settings", label: "Settings", icon: SettingsIcon }] : []),
                     ].map((tabItem) => (
                         <button key={tabItem.key} onClick={() => { setActiveTab(tabItem.key); setSearchParams({ id: id, tab: tabItem.key }) }} className={`flex items-center gap-2 px-4 py-2 text-sm transition-all ${activeTab === tabItem.key ? "bg-zinc-100 dark:bg-zinc-800/80" : "hover:bg-zinc-50 dark:hover:bg-zinc-700"}`} >
                             <tabItem.icon className="size-3.5" />
@@ -111,7 +128,22 @@ export default function ProjectDetail() {
                 <div className="mt-6">
                     {activeTab === "tasks" && (
                         <div className=" dark:bg-zinc-900/40 rounded max-w-6xl">
-                            <ProjectTasks tasks={tasks} />
+                            {/* View Toggle */}
+                            <div className="flex items-center gap-1 mb-4">
+                                <div className="inline-flex rounded-lg border border-zinc-200 dark:border-zinc-700 p-0.5 bg-zinc-100 dark:bg-zinc-800/50">
+                                    <button
+                                        onClick={() => setTaskView("table")}
+                                        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${taskView === "table"
+                                                ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm"
+                                                : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
+                                            }`}
+                                    >
+                                        <List className="size-3.5" />
+                                        Table
+                                    </button>
+                                </div>
+                            </div>
+                            <ProjectTasks tasks={tasks} canDeleteTask={canDeleteTask} />
                         </div>
                     )}
                     {activeTab === "analytics" && (
@@ -134,6 +166,8 @@ export default function ProjectDetail() {
 
             {/* Create Task Modal */}
             {showCreateTask && <CreateTaskDialog showCreateTask={showCreateTask} setShowCreateTask={setShowCreateTask} projectId={id} />}
+
+
         </div>
     );
 }
